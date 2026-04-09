@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="0"/>
+    <title>IAM Ticket Assistant - AI Support</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-gradient"></div>
+    <div class="background-pattern"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="chat-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-icon logo-image">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="IAM Logo">
+                    </div>
+                    <div class="header-text">
+                        <h1>IAM TicketBuddy</h1>
+                        <p class="subtitle">Secure. Automated. Efficient</p>
+                    </div>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <div class="messages-wrapper" id="messagesWrapper">
+                <div class="messages" id="messages">
+                    <!-- Welcome message -->
+                    <div class="message-group assistant">
+                        <div class="message-avatar">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <path d="M8 14C8 14 9.5 16 12 16C14.5 16 16 14 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="9" cy="9" r="1" fill="currentColor"/>
+                                <circle cx="15" cy="9" r="1" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <div class="message assistant">
+                            <div class="message-content">
+                                <p>👋 Hello! I'm your AI Ticket Assistant.</p>
+                                <p>I'm here to help you with:</p>
+                                <ul>
+                                    <li>Creating new support tickets</li>
+                                    <li>Checking and updating the status of your existing tickets</li>
+                                </ul>
+                                <p>How can I assist you today?</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-container">
+                    <textarea 
+                        id="userInput" 
+                        placeholder="Type your message here..." 
+                        rows="1"
+                        maxlength="2000"
+                    ></textarea>
+                    <button id="sendButton" class="send-button" aria-label="Send message">
+                        <svg class="send-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <svg class="loading-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
+                            <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="input-footer">
+                    <span class="char-count"><span id="charCount">0</span>/2000</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// Kill bfcache entirely — browser cannot restore this page from cache
+window.addEventListener('unload', function() {});
+
+function checkAuth() {
+    const token = localStorage.getItem('idmworks_token');
+    if (!token) {
+        window.location.replace('http://localhost:5001/');
+        return false;
+    }
+    return true;
+}
+
+(function () {
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get('token');
+    if (token) {
+        localStorage.setItem('idmworks_token', token);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    checkAuth();
+})();
+
+// Fires on back/forward including bfcache restore
+window.addEventListener('pageshow', function (e) {
+    // e.persisted = true means restored from bfcache
+    if (e.persisted) {
+        // Force full page reload instead of bfcache restore
+        window.location.reload();
+        return;
+    }
+    checkAuth();
+});
+</script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+
+</body>
+</html>

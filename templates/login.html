@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+  <title>IDMWORKS — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+  :root {
+    --bg:          #0d1929;
+    --bg2:         #0a1520;
+    --surface:     #112035;
+    --surface2:    #162840;
+    --border:      rgba(255,255,255,0.08);
+    --border-hi:   rgba(255,255,255,0.15);
+    --border-focus:rgba(147,210,255,0.5);
+    --text:        #ffffff;
+    --text2:       #93b4d4;
+    --muted:       #4a6a88;
+    --accent:      #93d2ff;
+    --accent2:     #5ba8e5;
+    --accent-glow: rgba(147,210,255,0.12);
+    --green:       #34d399;
+    --red:         #fb7185;
+    --font-display:'Syne', sans-serif;
+    --font-ui:     'Inter', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+  @media (max-width: 860px) { html, body { overflow: auto; } }
+
+  .shell { display: flex; height: 100vh; min-height: 600px; }
+
+  /* ══ LEFT PANEL ══ */
+  .left {
+    flex: 1; position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    padding: 52px 72px;
+    background: var(--bg);
+  }
+
+  .curves { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .curves svg { position: absolute; left: -60px; top: -40px; width: 75%; height: 110%; }
+
+  .left-glow {
+    position: absolute; left: -120px; top: 10%;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(91,168,229,0.08) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .left-inner { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
+
+  .brand { display: flex; align-items: center; animation: fadeUp 0.5s 0.05s ease both; }
+  .brand img {
+  height: 52px; width: auto; object-fit: contain;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  filter: brightness(1.15) drop-shadow(0 2px 12px rgba(147,210,255,0.25));
+}
+
+  .headline { margin-top: auto; padding-bottom: 64px; animation: fadeUp 0.6s 0.15s ease both; }
+  .headline h1 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(48px, 5vw, 72px); line-height: 1.08;
+    letter-spacing: -0.02em; color: #ffffff; margin-bottom: 24px;
+  }
+  .headline h1 span { color: var(--accent); }
+  .headline-desc {
+    font-size: 15px; line-height: 1.8; color: var(--text2);
+    max-width: 400px; font-weight: 300; letter-spacing: 0.01em;
+  }
+
+  .curve-dot {
+    position: absolute; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent), 0 0 24px rgba(147,210,255,0.4);
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  /* ══ RIGHT PANEL ══ */
+  .right {
+    width: 460px; flex-shrink: 0;
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 52px 48px 40px;
+    overflow-y: auto; position: relative;
+    animation: slideIn 0.5s 0.1s ease both;
+  }
+  .right::after {
+    content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(147,210,255,0.4), transparent);
+  }
+
+  .mobile-brand { display: none; align-items: center; margin-bottom: 32px; }
+  .mobile-brand img {
+  height: 44px; width: auto;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  filter: brightness(1.15) drop-shadow(0 2px 10px rgba(147,210,255,0.2));
+}
+
+  .tabs {
+    display: flex; margin-bottom: 36px;
+    background: var(--surface); border-radius: 10px; padding: 3px;
+    border: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1; padding: 9px 0; border: none; cursor: pointer;
+    font-family: var(--font-ui); font-size: 13px; font-weight: 500;
+    color: var(--muted); border-radius: 8px; background: none;
+    transition: all 0.2s; letter-spacing: 0.01em;
+  }
+  .tab.on { color: var(--text); background: var(--surface2); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+  .tab:hover:not(.on) { color: var(--text2); }
+
+  .view { display: none; }
+  .view.on { display: block; animation: fadeUp 0.28s ease both; }
+
+  .form-head { margin-bottom: 28px; }
+  .form-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 26px; letter-spacing: -0.02em; margin-bottom: 7px; color: #ffffff; }
+  .form-head p  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  .field { margin-bottom: 16px; }
+  .field-lbl { display: block; margin-bottom: 7px; font-size: 12px; font-weight: 500; color: var(--text2); letter-spacing: 0.04em; }
+  .field-wrap { position: relative; }
+  .f-ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; display: flex; transition: color 0.2s; }
+  .f-inp {
+    width: 100%; padding: 12px 14px 12px 40px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: var(--font-ui); font-size: 14px;
+    outline: none; transition: all 0.2s;
+    -webkit-appearance: none; appearance: none;
+  }
+  .f-inp::placeholder { color: var(--muted); }
+  .f-inp:focus { border-color: var(--border-focus); background: var(--surface2); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .field-wrap:focus-within .f-ico { color: var(--accent); }
+  .f-inp.err { border-color: rgba(251,113,133,0.5); box-shadow: 0 0 0 3px rgba(251,113,133,0.08); }
+  .f-inp.ok  { border-color: rgba(52,211,153,0.4); }
+
+  .eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; display: flex; transition: color 0.2s; }
+  .eye:hover { color: var(--accent); }
+
+  .ferr { display: none; margin-top: 5px; font-size: 12px; color: var(--red); align-items: center; gap: 5px; }
+  .ferr.on { display: flex; }
+
+  .strength { display: flex; gap: 3px; margin-top: 7px; }
+  .sbar { flex: 1; height: 2px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+
+  .alert { display: none; padding: 12px 14px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; line-height: 1.5; gap: 9px; align-items: flex-start; animation: fadeUp 0.25s ease; }
+  .alert.on  { display: flex; }
+  .alert.err { background: rgba(251,113,133,0.08); border: 1px solid rgba(251,113,133,0.2); color: #fda4af; }
+  .alert.win { background: rgba(52,211,153,0.08);  border: 1px solid rgba(52,211,153,0.2);  color: #6ee7b7; }
+  .alert svg { flex-shrink: 0; margin-top: 1px; }
+
+  .forgot-row { text-align: right; margin-top: -8px; margin-bottom: 20px; }
+  .lnk { background: none; border: none; cursor: pointer; font-family: var(--font-ui); font-size: 12px; color: var(--muted); transition: color 0.2s; padding: 0; }
+  .lnk:hover { color: var(--accent); }
+
+  .btn-p {
+    width: 100%; padding: 13px 24px; border: none; border-radius: 10px; cursor: pointer;
+    background: linear-gradient(135deg, #3b9edd 0%, #93d2ff 50%, #5ba8e5 100%);
+    color: #0a1520; font-family: var(--font-ui); font-weight: 700;
+    font-size: 14px; letter-spacing: 0.03em;
+    box-shadow: 0 4px 20px rgba(91,168,229,0.35), 0 1px 0 rgba(255,255,255,0.2) inset;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.22s;
+  }
+  .btn-p:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(91,168,229,0.55), 0 1px 0 rgba(255,255,255,0.2) inset; background: linear-gradient(135deg, #4aaef0 0%, #a8dcff 50%, #6bbaf5 100%); }
+  .btn-p:active:not(:disabled) { transform: translateY(0); }
+  .btn-p:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-s {
+    width: 100%; padding: 12px; border-radius: 10px; cursor: pointer;
+    background: transparent; border: 1px solid var(--border-hi);
+    color: var(--text2); font-family: var(--font-ui); font-weight: 500;
+    font-size: 14px; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-s:hover { border-color: rgba(147,210,255,0.35); color: var(--accent); background: rgba(147,210,255,0.04); }
+
+  .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+  .dvl { flex: 1; height: 1px; background: var(--border); }
+  .dvt { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .spin { width: 14px; height: 14px; border: 2px solid rgba(10,21,32,0.3); border-top-color: #0a1520; border-radius: 50%; animation: rotate 0.65s linear infinite; }
+
+  .right-foot { margin-top: auto; padding-top: 24px; font-size: 11px; color: var(--muted); letter-spacing: 0.05em; line-height: 2; }
+
+  @keyframes fadeUp   { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes slideIn  { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes rotate   { to{transform:rotate(360deg)} }
+  @keyframes glow-pulse {
+    0%,100%{ opacity:1; box-shadow:0 0 10px var(--accent),0 0 20px rgba(147,210,255,0.4); }
+    50%    { opacity:0.4; box-shadow:0 0 4px var(--accent),0 0 8px rgba(147,210,255,0.2); }
+  }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)}
+    40%{transform:translateX(7px)}  60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+  }
+
+  .brand    { animation: fadeUp 0.5s 0.05s ease both; }
+  .headline { animation: fadeUp 0.6s 0.12s ease both; }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #162840 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    transition: background-color 9999s;
+  }
+
+  @media (max-width: 1100px) { .left{padding:44px 52px;} .right{width:420px;padding:48px 36px 36px;} }
+  @media (max-width: 860px) {
+    .shell{flex-direction:column;height:auto;}
+    .left{flex:none;padding:32px 28px 36px;}
+    .headline{margin-top:24px;padding-bottom:0;}
+    .headline h1{font-size:40px;} .headline-desc{display:none;}
+    .right{width:100%;padding:36px 28px 44px;border-left:none;border-top:1px solid var(--border);}
+    .mobile-brand{display:flex;} .brand{display:none;}
+  }
+  @media (max-width: 480px) { .left{padding:24px 20px 28px;} .right{padding:28px 20px 36px;} .headline h1{font-size:34px;} }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="left-glow"></div>
+    <div class="curves">
+      <svg viewBox="0 0 700 800" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+        <path d="M -60 600 C 80 500, 180 320, 260 200 C 340 80, 420 20, 560 -40" stroke="rgba(147,210,255,0.14)" stroke-width="1.5" fill="none"/>
+        <path d="M -60 650 C 60 560, 160 390, 230 270 C 300 150, 390 80, 520 10"  stroke="rgba(147,210,255,0.22)" stroke-width="1"   fill="none"/>
+        <path d="M -60 700 C 40 620, 130 460, 200 340 C 270 220, 360 140, 480 60" stroke="rgba(147,210,255,0.10)" stroke-width="2"   fill="none"/>
+        <path d="M -60 730 C 30 660, 110 510, 175 400 C 240 290, 325 200, 440 110" stroke="rgba(147,210,255,0.07)" stroke-width="1"  fill="none"/>
+        <path d="M -60 640 C 70 540, 170 360, 245 240 C 320 120, 410 50, 540 -20"  stroke="rgba(147,210,255,0.30)" stroke-width="0.75" fill="none" filter="url(#glow)"/>
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+      </svg>
+      <div class="curve-dot" style="left:8%;top:62%"></div>
+      <div class="curve-dot" style="left:22%;top:48%;animation-delay:1s"></div>
+      <div class="curve-dot" style="left:36%;top:37%;animation-delay:2s"></div>
+    </div>
+
+    <div class="left-inner">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="IDMWORKS"/>
+      </div>
+      <div class="headline">
+        <h1>Resolve faster.<br/><span>Lead smarter.</span></h1>
+        <p class="headline-desc">
+          IDMWORKS connects your team to an AI agent <br/>
+          create, track and resolve tickets.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="mobile-brand">
+      <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="IDMWORKS"/>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab on" onclick="goTab('login')">Sign In</button>
+      <button class="tab"    onclick="goTab('signup')">Create Account</button>
+    </div>
+
+    <!-- SIGN IN -->
+    <div class="view on" id="v-login">
+      <div class="form-head">
+        <h2>Welcome back</h2>
+        <p>Sign in to access the IDMWORKS AI Agent</p>
+      </div>
+      <div class="alert" id="a-login"></div>
+      <form id="f-login" onsubmit="doLogin(event)" novalidate>
+        <div class="field">
+          <label class="field-lbl" for="l-email">Email address</label>
+          <div class="field-wrap">
+            <span class="f-ico"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg></span>
+            <input class="f-inp" id="l-email" type="email" placeholder="you@company.com" autocomplete="email" autofocus/>
+          </div>
+          <div class="ferr" id="e-l-email"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--red)"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg><span></span></div>
+        </div>
+        <div class="field">
+          <label class="field-lbl" for="l-pass">Password</label>
+          <div class="field-wrap">
+            <span class="f-ico"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+            <input class="f-inp" id="l-pass" type="password" placeholder="Enter your password" autocomplete="current-password"/>
+            <button type="button" class="eye" onclick="eyeToggle('l-pass',this)" tabindex="-1">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="ferr" id="e-l-pass"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--red)"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg><span></span></div>
+        </div>
+        <div class="forgot-row">
+          <button type="button" class="lnk" onclick="goView('forgot')">Forgot password?</button>
+        </div>
+        <button class="btn-p" type="submit" id="btn-login">Sign In</button>
+        <div class="divider"><div class="dvl"></div><span class="dvt">Don't have an account yet?</span><div class="dvl"></div></div>
+        <button type="button" class="btn-s" onclick="goTab('signup')">Create a free account</button>
+      </form>
+    </div>
+
+    <!-- SIGN UP -->
+    <div class="view" id="v-signup">
+      <div class="form-head">
+        <h2>Create account</h2>
+      </div>
+      <div class="alert" id="a-signup"></div>
+      <form id="f-signup" onsubmit="doSignup(event)" novalidate>
+        <div class="field">
+          <label class="field-lbl" for="s-name">Full name</label>
+          <div class="field-wrap">
+            <span class="f-ico"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+            <input class="f-inp" id="s-name" type="text" placeholder="Jane Smith" autocomplete="name"/>
+          </div>
+          <div class="ferr" id="e-s-name"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--red)"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg><span></span></div>
+        </div>
+        <div class="field">
+          <label class="field-lbl" for="s-email">Work email</label>
+          <div class="field-wrap">
+            <span class="f-ico"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg></span>
+            <input class="f-inp" id="s-email" type="email" placeholder="you@company.com" autocomplete="email"/>
+          </div>
+          <div class="ferr" id="e-s-email"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--red)"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg><span></span></div>
+        </div>
+        <div class="field">
+          <label class="field-lbl" for="s-pass">Password</label>
+          <div class="field-wrap">
+            <span class="f-ico"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+            <input class="f-inp" id="s-pass" type="password" placeholder="Min. 8 characters" oninput="chkStrength(this.value)" autocomplete="new-password"/>
+            <button type="button" class="eye" onclick="eyeToggle('s-pass',this)" tabindex="-1"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+          <div class="strength" id="strength"><div class="sbar" id="sb1"></div><div class="sbar" id="sb2"></div><div class="sbar" id="sb3"></div><div class="sbar" id="sb4"></div></div>
+          <div class="ferr" id="e-s-pass"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--red)"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg><span></span></div>
+        </div>
+        <div class="field">
+          <label class="field-lbl" for="s-conf">Confirm password</label>
+          <div class="field-wrap">
+            <span class="f-ico"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+            <input class="f-inp" id="s-conf" type="password" placeholder="Repeat password" autocomplete="new-password"/>
+          </div>
+          <div class="ferr" id="e-s-conf"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--red)"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg><span></span></div>
+        </div>
+        <button class="btn-p" type="submit" id="btn-signup" style="margin-top:8px">Create Account</button>
+      </form>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div class="view" id="v-forgot">
+      <div class="form-head">
+        <h2>Reset password</h2>
+        <p>Enter your email and we'll send a secure reset link</p>
+      </div>
+      <div class="alert" id="a-forgot"></div>
+      <form id="f-forgot" onsubmit="doForgot(event)" novalidate>
+        <div class="field" id="fgt-field">
+          <label class="field-lbl" for="fg-email">Email address</label>
+          <div class="field-wrap">
+            <span class="f-ico"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg></span>
+            <input class="f-inp" id="fg-email" type="email" placeholder="you@company.com"/>
+          </div>
+          <div class="ferr" id="e-fg-email"><svg width="12" height="12" viewBox="0 0 24 24" fill="var(--red)"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg><span></span></div>
+        </div>
+        <button class="btn-p" type="submit" id="btn-forgot" style="margin-bottom:14px">Send Reset Link</button>
+      </form>
+      <button class="btn-s" onclick="goView('login')">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Sign In
+      </button>
+    </div>
+
+    <div class="right-foot">IDMWORKS © 2026 · Enterprise AI Platform</div>
+  </div>
+</div>
+
+<script>
+// ── Runs on EVERY page visit including back button (bfcache fix) ─────────────
+function resetLoginPage() {
+  // Clear token
+  localStorage.removeItem('idmworks_token');
+  localStorage.removeItem('idmworks_user');
+
+  // Clear all input fields
+  ['l-email','l-pass','s-name','s-email','s-pass','s-conf','fg-email'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('err','ok'); }
+  });
+
+  // Hide all error messages
+  document.querySelectorAll('.ferr').forEach(el => el.classList.remove('on'));
+
+  // Clear all alerts
+  ['a-login','a-signup','a-forgot'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.className = 'alert'; el.innerHTML = ''; }
+  });
+
+  // Reset buttons to default state
+  const btnLogin  = document.getElementById('btn-login');
+  const btnSignup = document.getElementById('btn-signup');
+  const btnForgot = document.getElementById('btn-forgot');
+  if (btnLogin)  { btnLogin.disabled  = false; btnLogin.innerHTML  = 'Sign In'; }
+  if (btnSignup) { btnSignup.disabled = false; btnSignup.innerHTML = 'Create Account'; }
+  if (btnForgot) { btnForgot.disabled = false; btnForgot.innerHTML = 'Send Reset Link'; }
+
+  // Go back to Sign In tab
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('on', i===0));
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('on'));
+  const loginView = document.getElementById('v-login');
+  if (loginView) loginView.classList.add('on');
+  const tabs = document.getElementById('tabs');
+  if (tabs) tabs.style.display = 'flex';
+}
+
+// Runs on normal load
+(function () { resetLoginPage(); })();
+
+// Runs when user presses BACK — this is the key fix for bfcache
+window.addEventListener('pageshow', function (e) {
+  resetLoginPage();
+});
+
+// ── Config ────────────────────────────────────────────────────────────────────
+const API         = '';
+const CHATBOT_URL = '{{ chatbot_url }}';
+
+// ── Routing ───────────────────────────────────────────────────────────────────
+function goTab(t) {
+  document.querySelectorAll('.tab').forEach((b,i) =>
+    b.classList.toggle('on',(i===0&&t==='login')||(i===1&&t==='signup'))
+  );
+  goView(t);
+}
+function goView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('on'));
+  document.getElementById(`v-${v}`).classList.add('on');
+  document.getElementById('tabs').style.display = v==='forgot' ? 'none' : 'flex';
+}
+
+// ── Field helpers ─────────────────────────────────────────────────────────────
+function fieldErr(id, msg) {
+  const w = document.getElementById(id); if (!w) return;
+  w.querySelector('span').textContent = msg;
+  w.classList.toggle('on', !!msg);
+  const inp = w.closest('.field')?.querySelector('input');
+  if (inp) { inp.classList.toggle('err',!!msg); inp.classList.toggle('ok',!msg&&inp.value.length>0); }
+}
+function clearFields(...ids) { ids.forEach(id => fieldErr(id,'')); }
+function showAlert(zid, type, msg) {
+  const el  = document.getElementById(zid);
+  const ico = type==='win'
+    ? `<svg width="14" height="14" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="9 12 12 15 16 9"/></svg>`
+    : `<svg width="14" height="14" fill="none" stroke="var(--red)"   stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" stroke-linecap="round"/></svg>`;
+  el.innerHTML = ico + `<span>${msg}</span>`;
+  el.className = `alert on ${type}`;
+}
+function clearAlert(id) { const e=document.getElementById(id); if(e){e.className='alert'; e.innerHTML='';} }
+function setBtn(id, loading, label) {
+  const b=document.getElementById(id); if(!b) return;
+  b.disabled=loading;
+  b.innerHTML=loading?`<div class="spin"></div> Processing…`:label;
+}
+function shake(fid) {
+  const f=document.getElementById(fid); if(!f) return;
+  f.style.animation='';
+  requestAnimationFrame(()=>{ f.style.animation='shake .36s ease'; setTimeout(()=>f.style.animation='',400); });
+}
+function eyeToggle(iid, btn) {
+  const inp=document.getElementById(iid); const show=inp.type==='password'; inp.type=show?'text':'password';
+  btn.innerHTML = show
+    ? `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22" stroke-linecap="round"/></svg>`
+    : `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+}
+function chkStrength(v) {
+  let s=0;
+  if(v.length>=8)s++; if(/[A-Z]/.test(v))s++; if(/[0-9]/.test(v))s++; if(/[^A-Za-z0-9]/.test(v))s++;
+  const c=['','#fb7185','#fb923c','#facc15','#34d399'];
+  for(let i=1;i<=4;i++) document.getElementById(`sb${i}`).style.background = i<=s ? c[s] : 'var(--border)';
+}
+const isEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+async function doLogin(e) {
+  e.preventDefault();
+  clearAlert('a-login'); clearFields('e-l-email','e-l-pass');
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  let ok = true;
+  if (!isEmail(email)) { fieldErr('e-l-email','Enter a valid email address'); ok=false; }
+  if (!pass)           { fieldErr('e-l-pass','Password is required'); ok=false; }
+  if (!ok) { shake('f-login'); return; }
+  setBtn('btn-login', true, 'Sign In');
+  try {
+    const r    = await fetch(`${API}/api/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password:pass}) });
+    const data = await r.json();
+    setBtn('btn-login', false, 'Sign In');
+    if (!r.ok || !data.success) {
+      showAlert('a-login','err', data.message || 'Invalid email or password.');
+      shake('f-login'); return;
+    }
+    // Store token and user info
+    localStorage.setItem('idmworks_token', data.token);
+    localStorage.setItem('idmworks_user',  JSON.stringify(data.user));
+    // Show welcome message with first name
+    // Redirect immediately — no welcome message shown
+   window.location.href = data.redirect || `${CHATBOT_URL}?token=${data.token}`;
+  } catch(err) {
+    setBtn('btn-login', false, 'Sign In');
+    showAlert('a-login','err','Network error. Is the server running?');
+  }
+}
+
+// ── SIGN UP ───────────────────────────────────────────────────────────────────
+async function doSignup(e) {
+  e.preventDefault();
+  clearAlert('a-signup'); clearFields('e-s-name','e-s-email','e-s-pass','e-s-conf');
+  const name  = document.getElementById('s-name').value.trim();
+  const email = document.getElementById('s-email').value.trim();
+  const pass  = document.getElementById('s-pass').value;
+  const conf  = document.getElementById('s-conf').value;
+  let ok = true;
+  if (name.length < 2) { fieldErr('e-s-name','Name must be at least 2 characters'); ok=false; }
+  if (!isEmail(email)) { fieldErr('e-s-email','Enter a valid email address'); ok=false; }
+  if (pass.length < 8) { fieldErr('e-s-pass','Password must be at least 8 characters'); ok=false; }
+  if (pass !== conf)   { fieldErr('e-s-conf','Passwords do not match'); ok=false; }
+  if (!ok) { shake('f-signup'); return; }
+  setBtn('btn-signup', true, 'Create Account');
+  try {
+    const r    = await fetch(`${API}/api/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name, email, password:pass}) });
+    const data = await r.json();
+    setBtn('btn-signup', false, 'Create Account');
+    if (!r.ok || !data.success) {
+      if (data.errors?.email) fieldErr('e-s-email', data.errors.email);
+      else showAlert('a-signup','err', data.errors?.password || 'Registration failed.');
+      shake('f-signup'); return;
+    }
+    showAlert('a-signup','win','Account created! Please sign in.');
+    setTimeout(() => goTab('login'), 1400);
+  } catch(err) {
+    setBtn('btn-signup', false, 'Create Account');
+    showAlert('a-signup','err','Network error. Is the server running?');
+  }
+}
+
+// ── FORGOT PASSWORD ───────────────────────────────────────────────────────────
+async function doForgot(e) {
+  e.preventDefault();
+  clearAlert('a-forgot'); clearFields('e-fg-email');
+  const email = document.getElementById('fg-email').value.trim();
+  if (!isEmail(email)) { fieldErr('e-fg-email','Enter a valid email address'); shake('f-forgot'); return; }
+  setBtn('btn-forgot', true, 'Send Reset Link');
+  try {
+    const r    = await fetch(`${API}/api/forgot-password`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email}) });
+    const data = await r.json();
+    setBtn('btn-forgot', false, 'Send Reset Link');
+    document.getElementById('fgt-field').style.display = 'none';
+    document.getElementById('btn-forgot').style.display = 'none';
+    showAlert('a-forgot','win', data.message);
+  } catch(_) {
+    setBtn('btn-forgot', false, 'Send Reset Link');
+    showAlert('a-forgot','err','Network error. Please try again.');
+  }
+}
+</script>
+</body>
+</html>
